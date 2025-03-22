@@ -1,0 +1,45 @@
+﻿<h3>📝 Comentarios</h3>
+
+<div id="comentarios-container">
+    <ul id="lista-comentarios" class="list-group"></ul>
+</div>
+
+<div class="mt-3">
+    <textarea id="nuevo-comentario" class="form-control" rows="3" placeholder="Escribe un comentario..."></textarea>
+    <button id="btn-comentar" class="btn btn-primary mt-2">💬 Agregar Comentario</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var incidenciaId = @Model.Id;
+
+        function cargarComentarios() {
+            $.get("/Comentarios/ObtenerComentarios", { incidenciaId: incidenciaId }, function (data) {
+                $("#lista-comentarios").empty();
+                $.each(data, function (index, comentario) {
+                    $("#lista-comentarios").append("<li class='list-group-item'><b>" + comentario.Fecha + ":</b> " + comentario.Texto + "</li>");
+                });
+            });
+        }
+
+        $("#btn-comentar").click(function () {
+            var texto = $("#nuevo-comentario").val().trim();
+            if (texto === "") {
+                alert("El comentario no puede estar vacío.");
+                return;
+            }
+
+            $.post("/Comentarios/AgregarComentario", { incidenciaId: incidenciaId, texto: texto }, function (response) {
+                if (response.success) {
+                    $("#lista-comentarios").prepend("<li class='list-group-item'><b>" + response.fecha + ":</b> " + response.texto + "</li>");
+                    $("#nuevo-comentario").val("");
+                } else {
+                    alert(response.message);
+                }
+            });
+        });
+
+        cargarComentarios();
+    });
+</script>
